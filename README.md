@@ -138,37 +138,6 @@ cp /tmp/sudo_new /etc/pam.d/sudo
 sudo -s  # No password required
 ```
 
-## Recommended Mitigations
-
-### For Apple
-
-1. **Check `strlcat()` return value**
-   ```c
-   size_t result = strlcat(path, "/tmp/", buffer_size);
-   if (result >= buffer_size) {
-       return EINVAL;  // Truncation detected
-   }
-   ```
-
-2. **Use atomic operations**
-   ```c
-   // Create directory with correct ownership atomically
-   int fd = mkdirat(AT_FDCWD, path, mode);
-   fchown(fd, uid, gid);  // Use fd, not path
-   close(fd);
-   ```
-
-3. **Validate path consistency**
-   ```c
-   // Verify target after lchown
-   struct stat st_before, st_after;
-   lstat(path, &st_before);
-   lchown(path, uid, gid);
-   lstat(path, &st_after);
-   if (st_before.st_ino != st_after.st_ino) {
-       // Path was swapped - rollback
-   }
-   ```
 
 ## Timeline
 
