@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+    Entitlements for Glarus PoC dirhelper client
+    
+    The App Sandbox is required to trigger the vulnerability - dirhelper
+    only creates directories for sandboxed applications.
+    
+    The temporary exception allows communication with the dirhelper service.
+-->
+<dict>
+    <!-- Enable App Sandbox (required for exploit) -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    
+    <!-- Allow network client access (for bootstrap service lookup) -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    
+    <!-- Allow reading/writing user-selected files -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    
+    <!-- Temporary exception to communicate with dirhelper -->
+    <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+    <array>
+        <string>com.apple.bsd.dirhelper</string>
+    </array>
+</dict>
+</plist>
